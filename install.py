@@ -50,7 +50,7 @@ if __name__ == "__main__":
 	parser.add_argument("--verbose", action="store_true")
 	args = parser.parse_args()
 	dep = Dependency(name="godot-cpp")
-	src_dir = make_dep_src_dir(dep, args.root)
+	src_dir = make_dep_src_dir(dep, args.root, cmake=False)
 	repo = Repo(src_dir)
 	repo.git.submodule('update', '--init', '--recursive')
 	platform = make_platform()
