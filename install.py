@@ -19,6 +19,7 @@ def run_scons(src_dir, platform, options, verbose):
 	cmd  = f'scons'
 	cmd += f' -C {src_dir}'
 	cmd += f' platform={platform}'
+	cmd += f' macos_deplyment_target=13.3'
 	cmd += f' {options}'
 	cmd += f' -j 4'
 	run(cmd, verbose)
