@@ -43,27 +43,39 @@ def cmake_configure(src_dir, build_dir, install_dir, verbose):
 def cmake_install(build_dir, verbose):
 	run(f'cmake --install {build_dir}', verbose)
 
+def to_scons_target(config:str):
+	if config == "Debug":
+		return "debug"
+	if config == "Release":
+		return "release"
+	if config == "RelWithDebInfo":
+		return "release"
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--root", type=str, required=True)
 	parser.add_argument("--assets", type=str, required=True)
 	parser.add_argument("--clean", action="store_true")
 	parser.add_argument("--verbose", action="store_true")
+	parser.add_argument('--config', action='append', help='Configuration to install (default: Debug + Release)')
 	args = parser.parse_args()
 	dep = Dependency(name="godot-cpp")
 	src_dir = make_dep_src_dir(dep, args.root, cmake=False)
 	repo = Repo(src_dir)
 	repo.git.submodule('update', '--init', '--recursive')
 	platform = make_platform()
-	install_dir = make_install_dir(args.root)
-	install_lib_dir = os.path.join(install_dir, "lib")
-	lib_suffix = get_library_suffix()
-	build_lib_debug = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.debug.64.{lib_suffix}')
-	build_lib_release = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.release.64.{lib_suffix}')
-	if not os.path.exists(build_lib_debug):
-		run_scons(src_dir, platform, "target=debug generate_bindings=yes", args.verbose)
-	if not os.path.exists(build_lib_release):
-		run_scons(src_dir, platform, "target=release", args.verbose)
-	build_dir = make_dep_build_dir(dep, "none", args.root)
-	cmake_configure(src_dir, build_dir, install_dir, args.verbose)
-	cmake_install(build_dir, args.verbose)
+	done_one_config = False
+	for config in args.config:
+		install_dir = make_install_dir(args.root, config)
+		lib_suffix = get_library_suffix()
+		target = to_scons_target(config)
+		build_lib = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.{target}.64.{lib_suffix}')
+		if not os.path.exists(build_lib):
+			args = f'target={target}'
+			if not done_one_config:
+				args = args + ' generate_bindings=yes'
+				done_one_config = True
+			run_scons(src_dir, platform, args, args.verbose)
+		build_dir = make_dep_build_dir(dep, config, args.root)
+		cmake_configure(src_dir, build_dir, install_dir, args.verbose)
+		cmake_install(build_dir, args.verbose)
