@@ -14,6 +14,12 @@ else()
 	message(FATAL_ERROR "Unsupported platform for godot-cpp")
 endif()
 
+if (NOT GODOTCPP_TARGET)
+	message(FATAL_ERROR "GODOTCPP_TARGET is not set. (Should be 'debug' or 'release')")
+endif()
+
+set(godot-cpp_LIB "${CMAKE_INSTALL_PREFIX}/lib/libgodot-cpp.${OS_SUFFIX}.${GODOTCPP_TARGET}.64${LIB_SUFFIX}")
+
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
