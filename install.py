@@ -32,10 +32,11 @@ def get_library_suffix():
 	elif sys.platform == "darwin":
 		return "a"
 
-def cmake_configure(src_dir, build_dir, install_dir, verbose):
+def cmake_configure(src_dir, build_dir, install_dir, target, verbose):
 	cmake_cmd = 'cmake'
 	cmake_cmd += f' -B "{build_dir}"'
 	cmake_cmd += f' -S "{src_dir}"'
+	cmake_cmd += f' -DGODOTCPP_TARGET="{target}"'
 	cmake_cmd += f' -DCMAKE_PREFIX_PATH="{install_dir}"'
 	cmake_cmd += f' -DCMAKE_INSTALL_PREFIX="{install_dir}"'
 	run(cmake_cmd, verbose)
@@ -77,5 +78,5 @@ if __name__ == "__main__":
 				done_one_config = True
 			run_scons(src_dir, platform, scons_args, args.verbose)
 		build_dir = make_dep_build_dir(dep, config, args.root)
-		cmake_configure(src_dir, build_dir, install_dir, args.verbose)
+		cmake_configure(src_dir, build_dir, install_dir, target, args.verbose)
 		cmake_install(build_dir, args.verbose)
