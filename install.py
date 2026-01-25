@@ -71,11 +71,11 @@ if __name__ == "__main__":
 		target = to_scons_target(config)
 		build_lib = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.{target}.64.{lib_suffix}')
 		if not os.path.exists(build_lib):
-			args = f'target={target}'
+			scons_args = f'target={target}'
 			if not done_one_config:
-				args = args + ' generate_bindings=yes'
+				scons_args = scons_args + ' generate_bindings=yes'
 				done_one_config = True
-			run_scons(src_dir, platform, args, args.verbose)
+			run_scons(src_dir, platform, scons_args, args.verbose)
 		build_dir = make_dep_build_dir(dep, config, args.root)
 		cmake_configure(src_dir, build_dir, install_dir, args.verbose)
 		cmake_install(build_dir, args.verbose)
