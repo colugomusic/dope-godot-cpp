@@ -18,7 +18,8 @@ if (NOT GODOTCPP_TARGET)
 	message(FATAL_ERROR "GODOTCPP_TARGET is not set. (Should be 'debug' or 'release')")
 endif()
 
-set(godot-cpp_LIB "${CMAKE_INSTALL_PREFIX}/lib/libgodot-cpp.${OS_SUFFIX}.${GODOTCPP_TARGET}.64${LIB_SUFFIX}")
+set(godot-cpp_LIB_NAME "libgodot-cpp.${OS_SUFFIX}.${GODOTCPP_TARGET}.64${LIB_SUFFIX}")
+set(godot-cpp_LIB "${CMAKE_INSTALL_PREFIX}/lib/${godot-cpp_LIB_NAME}")
 
 include(CMakePackageConfigHelpers)
 
@@ -34,11 +35,8 @@ write_basic_package_version_file(
 	COMPATIBILITY AnyNewerVersion
 )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/bin/${godot-cpp_LIB_NAME}"
 		DESTINATION lib
-		FILES_MATCHING
-			PATTERN "libgodot-cpp.*.lib"
-			PATTERN "libgodot-cpp.*.a"
 )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
