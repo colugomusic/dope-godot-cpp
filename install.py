@@ -93,6 +93,12 @@ def get_scons_arch(arch):
 	# Unknown combination
 	raise ValueError(f"Unsupported arch combination: {arch}")
 
+def get_godotcpp_arch(scons_arch):
+	"""Convert scons arch to GODOTCPP_ARCH cmake variable."""
+	if scons_arch == "universal":
+		return "64"
+	return scons_arch
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--root", type=str, required=True)
@@ -126,5 +132,6 @@ if __name__ == "__main__":
 				done_one_config = True
 			run_scons(src_dir, platform, scons_args, args.verbose)
 		build_dir = make_dep_build_dir(dep, config, args.root)
-		cmake_configure(src_dir, build_dir, install_dir, target, scons_arch, args.verbose)
+		godotcpp_arch = get_godotcpp_arch(scons_arch)
+		cmake_configure(src_dir, build_dir, install_dir, target, godotcpp_arch, args.verbose)
 		cmake_install(build_dir, args.verbose)
