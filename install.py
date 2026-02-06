@@ -5,6 +5,7 @@ import sys
 import shutil
 import os
 
+
 def make_platform():
 	if sys.platform == "win32":
 		return "windows"
@@ -52,14 +53,30 @@ def to_scons_target(config:str):
 	if config == "RelWithDebInfo":
 		return "release"
 
+def load_settings(root_dir):
+	settings_path = os.path.join(root_dir, "settings.yml")
+	with open(settings_path, 'r') as f:
+		return YAML().load(f)
+
+def get_config_spec(settings, config_name):
+	"""Look up config in platform-specific configs first, then fall back to generic configs."""
+	if sys.platform == "darwin":
+		platform_settings = settings.get("macos", {})
+		platform_configs = platform_settings.get("configs", {})
+		if config_name in platform_configs:
+			return platform_configs[config_name]
+	# Fall back to generic configs
+	return settings.get("configs", {}).get(config_name, {})
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--root", type=str, required=True)
 	parser.add_argument("--assets", type=str, required=True)
 	parser.add_argument("--clean", action="store_true")
 	parser.add_argument("--verbose", action="store_true")
-	parser.add_argument('--config', action='append', help='Configuration to install (default: Debug + Release)')
+	parser.add_argument('--config', action='append', help='Configuration to install')
 	args = parser.parse_args()
+	settings = load_settings(args.root)
 	dep = Dependency(name="godot-cpp")
 	src_dir = make_dep_src_dir(dep, args.root, cmake=False)
 	repo = Repo(src_dir)
@@ -67,12 +84,17 @@ if __name__ == "__main__":
 	platform = make_platform()
 	done_one_config = False
 	for config in args.config:
+		config_spec = get_config_spec(settings, config)
+		config_type = config_spec.get("config", config)
+		arch = config_spec.get("arch")
 		install_dir = make_install_dir(args.root, config)
 		lib_suffix = get_library_suffix()
-		target = to_scons_target(config)
+		target = to_scons_target(config_type)
 		build_lib = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.{target}.64.{lib_suffix}')
 		if not os.path.exists(build_lib):
 			scons_args = f'target={target}'
+			if sys.platform == "darwin" and arch:
+				scons_args += f' macos_arch={arch}'
 			if not done_one_config:
 				scons_args = scons_args + ' generate_bindings=yes'
 				done_one_config = True
