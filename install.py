@@ -22,7 +22,7 @@ def run_scons(src_dir, platform, options, verbose):
 	cmd += f' platform={platform}'
 	if sys.platform == "darwin":
 		llvm_prefix = "/opt/homebrew/opt/llvm"
-		libcxx_prefix = os.path.expanduser("~/llvm-libcxx")
+		libcxx_prefix = os.path.expanduser("~/dv/llvm-libs")
 		cmd += f' macos_deployment_target=10.15'
 		cmd += f' CC="{llvm_prefix}/bin/clang"'
 		cmd += f' CXX="{llvm_prefix}/bin/clang++"'
