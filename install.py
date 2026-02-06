@@ -77,6 +77,22 @@ def get_config_spec(settings, config_name):
 	# Fall back to generic configs
 	return settings.get("configs", {}).get(config_name, {})
 
+def get_scons_arch(arch):
+	"""Convert arch config (string or list) to scons macos_arch value."""
+	if arch is None:
+		return None
+	# Normalize to list
+	if isinstance(arch, str):
+		arch = [arch]
+	# If both arm64 and x86_64, use universal
+	if set(arch) == {"arm64", "x86_64"}:
+		return "universal"
+	# Otherwise use the single arch
+	if len(arch) == 1:
+		return arch[0]
+	# Unknown combination
+	raise ValueError(f"Unsupported arch combination: {arch}")
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--root", type=str, required=True)
@@ -96,18 +112,19 @@ if __name__ == "__main__":
 		config_spec = get_config_spec(settings, config)
 		config_type = config_spec.get("config", config)
 		arch = config_spec.get("arch")
+		scons_arch = get_scons_arch(arch)
 		install_dir = make_install_dir(args.root, config)
 		lib_suffix = get_library_suffix()
 		target = to_scons_target(config_type)
 		build_lib = os.path.join(src_dir, "bin", f'libgodot-cpp.{platform}.{target}.64.{lib_suffix}')
 		if not os.path.exists(build_lib):
 			scons_args = f'target={target}'
-			if sys.platform == "darwin" and arch:
-				scons_args += f' macos_arch={arch}'
+			if sys.platform == "darwin" and scons_arch:
+				scons_args += f' macos_arch={scons_arch}'
 			if not done_one_config:
 				scons_args = scons_args + ' generate_bindings=yes'
 				done_one_config = True
 			run_scons(src_dir, platform, scons_args, args.verbose)
 		build_dir = make_dep_build_dir(dep, config, args.root)
-		cmake_configure(src_dir, build_dir, install_dir, target, arch, args.verbose)
+		cmake_configure(src_dir, build_dir, install_dir, target, scons_arch, args.verbose)
 		cmake_install(build_dir, args.verbose)
