@@ -17,14 +17,15 @@ def make_platform():
 		raise ValueError(f"Unsupported platform: {sys.platform}")
 
 def run_scons(src_dir, platform, options, verbose):
-	env = os.environ.copy()
-	if sys.platform == "darwin":
-		env["CC"] = "/opt/homebrew/opt/llvm/bin/clang"
-		env["CXX"] = "/opt/homebrew/opt/llvm/bin/clang++"
 	cmd  = f'scons'
 	cmd += f' -C {src_dir}'
 	cmd += f' platform={platform}'
-	cmd += f' macos_deployment_target=10.15'
+	if sys.platform == "darwin":
+		llvm_prefix = "/opt/homebrew/opt/llvm"
+		cmd += f' macos_deployment_target=10.15'
+		cmd += f' CC="{llvm_prefix}/bin/clang"'
+		cmd += f' CXX="{llvm_prefix}/bin/clang++"'
+		cmd += f' LINKFLAGS="-fuse-ld=lld -L{llvm_prefix}/lib/c++ -Wl,-rpath,{llvm_prefix}/lib/c++"'
 	cmd += f' {options}'
 	cmd += f' -j 4'
 	run(cmd, verbose)
