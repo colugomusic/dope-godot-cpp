@@ -25,7 +25,8 @@ def run_scons(src_dir, platform, options, verbose):
 		cmd += f' macos_deployment_target=10.15'
 		cmd += f' CC="{llvm_prefix}/bin/clang"'
 		cmd += f' CXX="{llvm_prefix}/bin/clang++"'
-		cmd += f' LINKFLAGS="-fuse-ld=lld -L{llvm_prefix}/lib/c++ -Wl,-rpath,{llvm_prefix}/lib/c++"'
+		# Use static libc++ for deployment (no LLVM dependency on customer machines)
+		cmd += f' LINKFLAGS="-fuse-ld=lld -nostdlib++ {llvm_prefix}/lib/c++/libc++.a {llvm_prefix}/lib/c++/libc++abi.a"'
 	cmd += f' {options}'
 	cmd += f' -j 4'
 	run(cmd, verbose)
