@@ -27,7 +27,7 @@ def run_scons(src_dir, platform, options, verbose):
 		cmd += f' CC="{llvm_prefix}/bin/clang"'
 		cmd += f' CXX="{llvm_prefix}/bin/clang++"'
 		# Use custom-built shared libc++ for deployment
-		cmd += f' LINKFLAGS="-fuse-ld=lld -nostdlib++ -L{libcxx_prefix}/lib -lc++ -lc++abi -Wl,-rpath,@executable_path -Wl,-rpath,@loader_path"'
+		cmd += f' LINKFLAGS="-nostdlib++ -L{libcxx_prefix}/lib -lc++ -lc++abi -Wl,-rpath,@executable_path -Wl,-rpath,@loader_path"'
 	cmd += f' {options}'
 	cmd += f' -j 4'
 	run(cmd, verbose)
