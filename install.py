@@ -22,11 +22,12 @@ def run_scons(src_dir, platform, options, verbose):
 	cmd += f' platform={platform}'
 	if sys.platform == "darwin":
 		llvm_prefix = "/opt/homebrew/opt/llvm"
+		libcxx_prefix = os.path.expanduser("~/llvm-libcxx")
 		cmd += f' macos_deployment_target=10.15'
 		cmd += f' CC="{llvm_prefix}/bin/clang"'
 		cmd += f' CXX="{llvm_prefix}/bin/clang++"'
-		# Use static libc++ for deployment (no LLVM dependency on customer machines)
-		cmd += f' LINKFLAGS="-fuse-ld=lld -nostdlib++ {llvm_prefix}/lib/c++/libc++.a {llvm_prefix}/lib/c++/libc++abi.a"'
+		# Use custom-built shared libc++ for deployment
+		cmd += f' LINKFLAGS="-fuse-ld=lld -nostdlib++ -L{libcxx_prefix}/lib -lc++ -lc++abi -Wl,-rpath,@executable_path -Wl,-rpath,@loader_path"'
 	cmd += f' {options}'
 	cmd += f' -j 4'
 	run(cmd, verbose)
