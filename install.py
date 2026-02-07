@@ -102,7 +102,7 @@ def get_godotcpp_arch(scons_arch):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--root", type=str, required=True)
-	parser.add_argument("--assets", type=str, required=True)
+	parser.add_argument("--project-dir", type=str, required=True)
 	parser.add_argument("--clean", action="store_true")
 	parser.add_argument("--verbose", action="store_true")
 	parser.add_argument('--config', action='append', help='Configuration to install')
